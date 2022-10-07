@@ -1,0 +1,26 @@
+ENVI
+description = {
+ Layer Stack Result}
+samples = 1830
+lines   = 1830
+bands   = 8
+data type = 2
+interleave = bsq
+file type = ENVI Standard
+header offset = 0
+byte order = 0
+map info = {UTM, 1.000, 1.000, 699960.000, 3400020.000, 6.000000e+01, 6.000000e+01, 49, North, World Geodetic System 1984, units=Meters}
+coordinate system string = {PROJCS["WGS 84 / UTM zone 49N",GEOGCS["WGS 84",DATUM["World Geodetic System 1984",SPHEROID["WGS 84",6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],UNIT["degree",0.0174532925199433]],PROJECTION["Transverse_Mercator"],PARAMETER["false_easting",500000.0],PARAMETER["false_northing",0.0],PARAMETER["central_meridian",111.0],PARAMETER["scale_factor",0.9996],PARAMETER["latitude_of_origin",0.0],UNIT["m",1.0]]}
+band names = {
+ Band 1 (B8), Band 2 (B7), Band 3 (B6), Band 4 (B5), Band 5 (B4), 
+ Band 6 (B3), Band 7 (B2), Band 8 (B1)}
+wavelength = {
+ 842.000000, 783.000000, 740.000000, 705.000000, 665.000000, 560.000000,
+ 490.000000, 443.000000}
+wavelength units = Nanometers
+data gain values = {
+ 1.00000000e-04, 1.00000000e-04, 1.00000000e-04, 1.00000000e-04,
+ 1.00000000e-04, 1.00000000e-04, 1.00000000e-04, 1.00000000e-04}
+data offset values = {
+ 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,
+ 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00}
