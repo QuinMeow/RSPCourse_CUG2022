@@ -31,28 +31,56 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QPushButton" name="Btn_ReadImage">
-        <property name="text">
-         <string>读取图像</string>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QPushButton" name="Btn_ReadImage">
+          <property name="text">
+           <string>读取图像</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="Btn_ShowImage">
+          <property name="text">
+           <string>显示图像</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
-       <widget class="QLineEdit" name="LinEdit_ImageAddress">
-        <property name="inputMask">
-         <string/>
-        </property>
-        <property name="text">
-         <string>武汉.tif</string>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QLineEdit" name="LinEdit_ImageAddress">
+          <property name="inputMask">
+           <string/>
+          </property>
+          <property name="text">
+           <string>武汉.tif</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="Btn_ChooseFile">
+          <property name="text">
+           <string>选择文件</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
-       <widget class="QPushButton" name="Btn_ShowImage">
-        <property name="text">
-         <string>显示图像</string>
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
         </property>
-       </widget>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </item>

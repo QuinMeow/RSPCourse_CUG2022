@@ -2,14 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ecd30148-9300-45b1-8aca-e8f7b3f32d55" name="Changes" comment="Changes">
-      <change afterPath="$PROJECT_DIR$/MainWin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/MainWin.ui" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test1.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/武汉.HDR" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/武汉.tif" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/武汉.tif.enp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/bil.tif" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MainWin.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainWin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/MainWin.ui" beforeDir="false" afterPath="$PROJECT_DIR$/MainWin.ui" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test1.py" beforeDir="false" afterPath="$PROJECT_DIR$/test1.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -76,5 +73,12 @@
   </component>
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <watches-manager>
+      <configuration name="PythonConfigurationType">
+        <watch expression="self.qim_data" language="Python" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>
