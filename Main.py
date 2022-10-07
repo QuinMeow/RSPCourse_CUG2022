@@ -39,10 +39,14 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         self.im_geotrans = dataset.GetGeoTransform()  # 仿射矩阵，左上角像素的大地坐标和像素分辨率
         self.im_proj = dataset.GetProjection()  # 地图投影信息，字符串表示
         im_data = dataset.ReadAsArray(0, 0, self.im_width, self.im_height)
-        self.qim_data = np.rollaxis(im_data[0:3, :, :], 0, 3)
+        self.qim_data = np.rollaxis(im_data, 0, 3)
+        # 设置UI波段最大值
+        self.SpBox_Red.setMaximum(self.im_bands)
+        self.SpBox_Green.setMaximum(self.im_bands)
+        self.SpBox_Blue.setMaximum(self.im_bands)
+
         if self.qim_data.dtype != np.uint8:  # 非8位无符号整型时
             self.qim_data = self.compress()
-            self.qim_data
         del dataset
 
     def compress(self):
@@ -52,23 +56,26 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         array_data = self.qim_data
         rows = self.im_height
         cols = self.im_width
-        bands = 3
+        bands = self.im_bands
 
         compress_data = np.zeros((rows, cols, bands))
 
         for i in range(bands):
             band_max = np.max(array_data[:, :, i])
             band_min = np.min(array_data[:, :, i])
-            compress_data[:, :, i] = ((array_data[:, :, i] - band_min ) / band_max * 255)
+            compress_data[:, :, i] = ((array_data[:, :, i] - band_min) / band_max * 255)
 
         int_data = compress_data.astype('uint8')
         return int_data
 
     def show_img(self):
-        height, width, bytesPerComponent = self.qim_data.shape
+        Band = np.array((int(self.SpBox_Red.value()) - 1, int(self.SpBox_Green.value()) - 1, \
+                         int(self.SpBox_Blue.value()) - 1))
+        show_img = self.qim_data[:, :, Band]
+        height, width, bytesPerComponent = show_img.shape
         size = QSize(self.MainView.size().width() - 10, self.MainView.size().height() - 10)
         bytesPerLine = bytesPerComponent * width
-        self.QImg = QImage(self.qim_data.tobytes(), width, height, bytesPerLine, QImage.Format_RGB888)
+        self.QImg = QImage(show_img.tobytes(), width, height, bytesPerLine, QImage.Format_RGB888)
         self.pixmap = QPixmap.fromImage(self.QImg).scaled(size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
         self.item = QGraphicsPixmapItem(self.pixmap)
         self.scene = QGraphicsScene()  # 创建场景
