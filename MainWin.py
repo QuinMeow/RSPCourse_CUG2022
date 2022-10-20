@@ -31,6 +31,7 @@ class Ui_MainWindow(object):
         self.SpBox_Ratio.setMinimum(0.001)
         self.SpBox_Ratio.setMaximum(10.0)
         self.SpBox_Ratio.setSingleStep(0.1)
+        self.SpBox_Ratio.setProperty("value", 1.0)
         self.SpBox_Ratio.setObjectName("SpBox_Ratio")
         self.horizontalLayout.addWidget(self.SpBox_Ratio)
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)

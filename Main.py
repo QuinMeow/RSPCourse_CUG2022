@@ -16,6 +16,8 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         super(MyMainWindow, self).__init__(parent)
         self.setupUi(self)
         self.MainView = MyMainView(self.MainView)
+        stretch_list = ["无拉伸", "2%线性拉伸"]
+        self.ComBox_Stretch.addItems(stretch_list)
         # 初始化成员对象
         self.im_width = 0
         self.im_height = 0
@@ -84,25 +86,17 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         """
         Band = np.array((int(self.SpBox_Red.value()) - 1, int(self.SpBox_Green.value()) - 1, \
                          int(self.SpBox_Blue.value()) - 1))
-        show_img = self.qim_data[:, :, Band]
-        height, width, bytesPerComponent = show_img.shape
-        # size = QSize(self.MainView.size().width() - 10, self.MainView.size().height() - 10)
-        bytesPerLine = bytesPerComponent * width
-        self.QImg = QImage(show_img.tobytes(), width, height, bytesPerLine, QImage.Format_RGB888)
-        # self.pixmap = QPixmap.fromImage(self.QImg).scaled(size, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-        # self.item = QGraphicsPixmapItem(self.pixmap)
-        # self.scene = QGraphicsScene()  # 创建场景
-        # self.scene.addItem(self.item)
-        # self.MainView.setScene(self.scene)
-        self.MainView.addLayer(self.QImg)
-        # 连接信号与槽2
+        show_data = self.qim_data[:, :, Band]
+        self.MainView.showOrigin(show_data)
+        # 连接信号与槽
         self.SpBox_Ratio.textChanged.connect(self.MainView.changeRatio)
         self.MainView.ratioChanged.connect(self.SpBox_Ratio.setValue)
+        self.ComBox_Stretch.activated.connect(self.MainView.changeStretch)
 
 
 class MyMainView(QGraphicsView):
     # 信号
-    ratioChanged = QtCore.pyqtSignal(float)
+    ratioChanged = QtCore.pyqtSignal(float)  # 比例
 
     def __init__(self, graphicsView):
         super().__init__()
@@ -125,24 +119,63 @@ class MyMainView(QGraphicsView):
         self.zoom_step = 0.1  # 缩放步长
         self.zoom_max = 10  # 缩放最大值
         self.zoom_min = 0.001  # 缩放最小值
+        self.stretchType = 0  # 拉伸类型
         self.pixmapItem = None
 
-    def addLayer(self, image):
+    def showOrigin(self, origin_data):
         """
-        将外部的QImage放入scene
-        :param image:
+        读取外部并存储原始数据
+        :param origin_data:
         :return:
         """
+        self.originData = origin_data
+        self.showStretch()
+    def showStretch(self):
+        """
+        将origin_data应用拉伸并转为pixmap放入scene
+        :param :
+        :return:
+        """
+        self.scene.clear() # 清空场景
+
         if self.pixmapItem != None:
             originX = self.pixmapItem.x()
             originY = self.pixmapItem.y()
         else:
             originX, originY = 0, 0
+        # 拉伸方式
+        if self.stretchType == 0:
+            show_data = self.originData
+        elif self.stretchType == 1:
+            show_data = self.stretch_2p(self.originData)
+
+        height, width, bytesPerComponent = show_data.shape
+        bytesPerLine = bytesPerComponent * width
+        image = QImage(show_data.tobytes(), width, height, bytesPerLine, QImage.Format_RGB888)
         self.ratio = min(self.width() / image.width(), self.height() / image.height())
         self.pixmap = QPixmap.fromImage(image)
         self.pixmapItem = self.scene.addPixmap(self.pixmap)
         self.pixmapItem.setScale(self.ratio)
         self.pixmapItem.setPos(originX, originY)
+
+    def changeStretch(self, new_stretch):
+        self.stretchType = new_stretch
+        self.showStretch()
+
+    def stretch_2p(self, show_data):
+
+        height, width, bytesPerComponent = show_data.shape
+        show_data_stretched = np.zeros((height, width, bytesPerComponent))
+        for i in range(bytesPerComponent):
+            p2 = np.percentile(show_data[:, :, i], 2)
+            p98 = np.percentile(show_data[:, :, i], 98)
+            r = (p98 - p2) / 255
+            show_data_stretched[:, :, i] = (show_data[:, :, i]) / r + p2
+            show_data_stretched[:, :, i] = np.where(show_data_stretched[:, :, i] < p2/ r + p2, p2/ r + p2, show_data_stretched[:, :, i])
+            show_data_stretched[:, :, i] = np.where(show_data_stretched[:, :, i] > p98/ r + p2, p98/ r + p2, show_data_stretched[:, :, i])
+        show_data_stretched = show_data_stretched.astype(np.uint8)
+        return show_data_stretched
+
 
     def changeRatio(self, new_ratio_str):
         self.ratio = float(new_ratio_str)

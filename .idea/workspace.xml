@@ -61,7 +61,7 @@
       <workItem from="1665915131644" duration="10000" />
       <workItem from="1665915191623" duration="56000" />
       <workItem from="1665915254840" duration="8000" />
-      <workItem from="1666246243453" duration="5835000" />
+      <workItem from="1666246243453" duration="9801000" />
     </task>
     <servers />
   </component>
@@ -82,14 +82,7 @@
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
   </component>
-  <component name="XDebuggerManager">
-    <watches-manager>
-      <configuration name="PythonConfigurationType">
-        <watch expression="self.qim_data" language="Python" />
-      </configuration>
-    </watches-manager>
-  </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/RSPCourse_CUG2022$Main.coverage" NAME="Main 覆盖结果" MODIFIED="1666251747754" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/RSPCourse_CUG2022$Main.coverage" NAME="Main 覆盖结果" MODIFIED="1666256013483" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
