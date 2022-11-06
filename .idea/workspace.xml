@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ecd30148-9300-45b1-8aca-e8f7b3f32d55" name="Changes" comment="Changes">
+      <change afterPath="$PROJECT_DIR$/BandMathWin.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/BandMathWin.ui" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MainWin.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainWin.py" afterDir="false" />
@@ -61,7 +63,11 @@
       <workItem from="1665915131644" duration="10000" />
       <workItem from="1665915191623" duration="56000" />
       <workItem from="1665915254840" duration="8000" />
-      <workItem from="1666246243453" duration="9801000" />
+      <workItem from="1666246243453" duration="10646000" />
+      <workItem from="1666332950366" duration="11701000" />
+      <workItem from="1666439369082" duration="604000" />
+      <workItem from="1666707590564" duration="4031000" />
+      <workItem from="1667744088988" duration="2583000" />
     </task>
     <servers />
   </component>
@@ -82,7 +88,15 @@
   <component name="VcsManagerConfiguration">
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
   </component>
+  <component name="XDebuggerManager">
+    <watches-manager>
+      <configuration name="PythonConfigurationType">
+        <watch expression="self.originData" language="Python" />
+        <watch expression="self.IntData" language="Python" />
+      </configuration>
+    </watches-manager>
+  </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/RSPCourse_CUG2022$Main.coverage" NAME="Main 覆盖结果" MODIFIED="1666256013483" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/RSPCourse_CUG2022$Main.coverage" NAME="Main 覆盖结果" MODIFIED="1667746538623" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
