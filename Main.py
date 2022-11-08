@@ -5,9 +5,12 @@ from PyQt5.Qt import *
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import *
 from osgeo import gdal
+from joblib import Parallel, delayed
+import multiprocessing
 
 from MainWin import *
 from BandMathWin import *
+from ReSampleWin import *
 
 
 # 定义主窗口类，继承自MainWin
@@ -72,6 +75,7 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         self.MainView.ratioChanged.connect(self.SpBox_Ratio.setValue)
         self.ComBox_Stretch.activated.connect(self.MainView.changeStretch)
         self.Btn_BandMath.clicked.connect(self.bandMath)
+        self.Btn_ReSample.clicked.connect(self.reSample)
 
     def bandMath(self):
         """
@@ -82,6 +86,20 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         BMW.show()
         if BMW.exec_() == QDialog.Accepted:
             self.MainView.showInput(BMW.bandMathResult)
+
+    def reSample(self):
+        """
+        重采样
+        :return:重采样后影像矩阵
+        """
+        RSW = ReSampleWindow(self.qim_data)
+        RSW.show()
+        if RSW.exec_() == QDialog.Accepted:
+            # 设置UI波段最大值
+            Band = np.array((int(self.SpBox_Red.value()) - 1, int(self.SpBox_Green.value()) - 1, \
+                             int(self.SpBox_Blue.value()) - 1))
+            show_data = RSW.resampleResult[:, :, Band]
+            self.MainView.showInput(show_data)
 
 
 class MyMainView(QGraphicsView):
@@ -400,6 +418,120 @@ class BandMathWindow(QDialog, Ui_BandMathWin):
                 return float(varName)
         else:
             return varName
+
+
+class ReSampleWindow(QDialog, Ui_ReSampleWin):
+    def __init__(self, qim_data):
+        super(ReSampleWindow, self).__init__()
+        self.setupUi(self)
+        self.origin_data = qim_data
+        self.origin_height, self.origin_width, self.bands = qim_data.shape
+        self.WidthRatio = 1.0
+        self.HeightRatio = 1.0
+        self.resampleResult = qim_data
+        self.buttonBox.accepted.connect(self.ReSample)
+        # 初始化窗口内数值
+        self.Label_OWidth.setText(str(self.origin_width))
+        self.Label_OHeight.setText(str(self.origin_height))
+        self.LinEdit_TWidth.setText(str(self.origin_width))
+        self.LinEdit_THeight.setText(str(self.origin_height))
+        self.LinEdit_TWidthRatio.setText('1')
+        self.LinEdit_THeightRatio.setText('1')
+        self.LinEdit_TWidth.setValidator(QtGui.QIntValidator(0, 65535))
+        self.LinEdit_THeight.setValidator(QtGui.QIntValidator(0, 65535))
+        self.LinEdit_TWidthRatio.setValidator(QtGui.QDoubleValidator(0.0, 100.0, 2))
+        self.LinEdit_THeightRatio.setValidator(QtGui.QDoubleValidator(0.0, 100.0, 2))
+        # 比率变动时计算目标分辨率
+        self.LinEdit_THeightRatio.textEdited.connect(self.calTargetResolution)
+        self.LinEdit_TWidthRatio.textEdited.connect(self.calTargetResolution)
+        # 目标分辨率变动时计算比例
+        self.LinEdit_TWidth.textEdited.connect(self.calTargetRatio)
+        self.LinEdit_THeight.textEdited.connect(self.calTargetRatio)
+
+    def calTargetResolution(self):
+        if self.LinEdit_TWidthRatio.text() != '' and self.LinEdit_THeightRatio.text() != '':
+            self.WidthRatio = round(float(self.LinEdit_TWidthRatio.text()), 2)
+            self.HeightRatio = round(float(self.LinEdit_THeightRatio.text()), 2)
+            self.LinEdit_TWidth.setText(str(int(self.origin_width * self.WidthRatio)))
+            self.LinEdit_THeight.setText(str(int(self.origin_height * self.HeightRatio)))
+
+    def calTargetRatio(self):
+        if self.LinEdit_TWidth.text() != '' and self.LinEdit_THeight.text() != '':
+            self.WidthRatio = round(int(self.LinEdit_TWidth.text()) / self.origin_width, 2)
+            self.HeightRatio = round(int(self.LinEdit_THeight.text()) / self.origin_height, 2)
+            self.LinEdit_TWidthRatio.setText(str(self.WidthRatio))
+            self.LinEdit_THeightRatio.setText(str(self.HeightRatio))
+
+    def ReSample(self):
+        TargetWidth = int(self.origin_width * self.WidthRatio)
+        TargetHeight = int(self.origin_height * self.HeightRatio)
+        self.resampleResult = np.zeros([TargetHeight, TargetWidth, self.bands])
+        cores_num = multiprocessing.cpu_count()
+        if self.rBtn_NN.isChecked():  # 最近邻
+            for row in range(TargetHeight):
+                srcRow = round(row / self.HeightRatio)
+                for col in range(TargetWidth):
+                    srcCol = round(col / self.WidthRatio)
+                    for band in range(self.bands):
+                        self.resampleResult[row, col, band] = self.origin_data[srcRow, srcCol, band]
+        elif self.rBtn_Liner.isChecked():  # 双线性
+            for row in range(TargetHeight):
+                srcRow = row / self.HeightRatio
+                n, i = np.modf(srcRow)  # 整数部分i，小数部分n
+                i = int(i)
+                for col in range(TargetWidth):
+                    srcCol = col / self.WidthRatio
+                    m, j = np.modf(srcCol)  # 整数部分j，小数部分m
+                    j = int(j)
+                    for band in range(self.bands):
+                        self.resampleResult[row, col, band] = \
+                            self.origin_data[i, j, band] + self.origin_data[i + 1, j, band] * n + self.origin_data[
+                                i, j + 1, band] * m + self.origin_data[i + 1, j + 1, band] * n * m
+        elif self.rBtn_Cube.isChecked():  # 双立方
+            for row in range(TargetHeight):
+                srcRow = row / self.HeightRatio
+                v, i = np.modf(srcRow)  # 整数部分i，小数部分v
+                A = np.array([self.BF(1 + v), self.BF(v), self.BF(1 - v), self.BF(2 - v)])
+                i = int(i)
+                for col in range(TargetWidth):
+                    srcCol = col / self.WidthRatio
+                    u, j = np.modf(srcCol)  # 整数部分j，小数部分u
+                    C = np.array([self.BF(1 + u), self.BF(u), self.BF(1 - u), self.BF(2 - u)])
+                    C = C.T
+                    j = int(j)
+                    for band in range(self.bands):
+                        B = self.Get16Value(i, j, band)
+                        self.resampleResult[row, col, band] = np.dot(np.dot(A, B), C)
+
+    def BF(self, x):  # 双立方卷积公式
+        if 0 <= abs(x) <= 1:
+            return 1 - 2 * x ** 2 + abs(x) ** 3
+        elif 1 < np.abs(x) <= 2:
+            return 4 - 8 * abs(x) + 5 * x ** 2 - abs(x) ** 3
+
+    def Get16Value(self, row, col, band):  # 获取4*4区域信息
+        if 1 <= row <= self.origin_height - 3 and 1 <= col <= self.origin_width - 3:
+            return self.origin_data[row - 1:row + 3, col - 1:col + 3, band]
+        else:
+            B = np.zeros([4, 4])
+            for i in range(4):
+                for j in range(4):
+                    B[i, j] = self.GetValue(row - 1 + i, col - 1 + i, band)
+
+        return B
+
+    def GetValue(self, row, col, band):
+        if row >= self.origin_height:
+            row = self.origin_height - 1
+        elif row <= 0:
+            row = 0
+
+        if col >= self.origin_width:
+            col = self.origin_width - 1
+        elif col <= 0:
+            col = 0
+
+        return self.origin_data[row, col, band]
 
 
 # 程序主入口
