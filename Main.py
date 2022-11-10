@@ -2,15 +2,15 @@ import sys
 import re
 import numpy as np
 from PyQt5.Qt import *
-from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import *
 from osgeo import gdal
-from joblib import Parallel, delayed
-import multiprocessing
 
 from MainWin import *
 from BandMathWin import *
 from ReSampleWin import *
+# from UnSupClassifyWin import *
+from UnSupClassifyWindow import *
+from SupCassifyWindow import *
 
 
 # 定义主窗口类，继承自MainWin
@@ -23,6 +23,7 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         stretch_list = ["无拉伸", "2%线性拉伸"]
         self.ComBox_Stretch.addItems(stretch_list)
         # 初始化成员对象
+        self.filename = self.LinEdit_ImageAddress.text()
         self.im_width = 0
         self.im_height = 0
         self.im_bands = 0
@@ -31,7 +32,6 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         self.qim_data = np.zeros((0, 0, 0))
         # 处理信号与槽的连接
         self.Btn_ReadImage.clicked.connect(self.read_img)
-        self.Btn_ShowImage.clicked.connect(self.show_img)
         self.Btn_ChooseFile.clicked.connect(self.openfile)
 
     def openfile(self):
@@ -46,12 +46,12 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         读取影像，如非8位无符号进行转换
         :return:
         """
-        filename = self.LinEdit_ImageAddress.text()
-        dataset = gdal.Open(filename)  # 打开文件
+        self.filename = self.LinEdit_ImageAddress.text()
+        dataset = gdal.Open(self.filename)  # 打开文件
         self.im_width = dataset.RasterXSize  # 栅格矩阵的列数
         self.im_height = dataset.RasterYSize  # 栅格矩阵的行数
         self.im_bands = dataset.RasterCount  # 波段数
-        self.im_geotrans = dataset.GetGeoTransform()  # 仿射矩阵，左上角像素的大地坐标和像素分辨率
+        self.im_geotrans = dataset.GetGeoTransform()  # 仿射矩阵，左上像素的大地坐标和像素分辨率
         self.im_proj = dataset.GetProjection()  # 地图投影信息，字符串表示
         im_data = dataset.ReadAsArray(0, 0, self.im_width, self.im_height)
         self.qim_data = np.rollaxis(im_data, 0, 3)
@@ -60,6 +60,7 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         self.SpBox_Green.setMaximum(self.im_bands)
         self.SpBox_Blue.setMaximum(self.im_bands)
         del dataset
+        self.Btn_ShowImage.clicked.connect(self.show_img)
 
     def show_img(self):
         """
@@ -76,6 +77,8 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         self.ComBox_Stretch.activated.connect(self.MainView.changeStretch)
         self.Btn_BandMath.clicked.connect(self.bandMath)
         self.Btn_ReSample.clicked.connect(self.reSample)
+        self.Btn_UnSupClassify.clicked.connect(self.UnSupClassify)
+        self.Btn_SupClassify.clicked.connect(self.SupClassify)
 
     def bandMath(self):
         """
@@ -96,10 +99,34 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         RSW.show()
         if RSW.exec_() == QDialog.Accepted:
             # 设置UI波段最大值
-            Band = np.array((int(self.SpBox_Red.value()) - 1, int(self.SpBox_Green.value()) - 1, \
+            Band = np.array((int(self.SpBox_Red.value()) - 1, int(self.SpBox_Green.value()) - 1,
                              int(self.SpBox_Blue.value()) - 1))
             show_data = RSW.resampleResult[:, :, Band]
             self.MainView.showInput(show_data)
+
+    def UnSupClassify(self):
+        """
+        非监督分类
+        :return:
+        """
+        Band = np.array((int(self.SpBox_Red.value()) - 1, int(self.SpBox_Green.value()) - 1,
+                         int(self.SpBox_Blue.value()) - 1))
+        USC = UnSupClassifyWindow(self.qim_data[:, :, Band])
+        USC.show()
+        if USC.exec_() == QDialog.Accepted:
+            self.MainView.showInput(USC.Classified_data)
+
+    def SupClassify(self):
+        """
+        监督分类
+        :return:
+        """
+        # Band = np.array((int(self.SpBox_Red.value()) - 1, int(self.SpBox_Green.value()) - 1,
+        #                  int(self.SpBox_Blue.value()) - 1))
+        SC = SupClassifyWindow(self.filename,self.qim_data)
+        SC.show()
+        if SC.exec_() == QDialog.Accepted:
+            self.MainView.showInput(SC.Classified_data)
 
 
 class MyMainView(QGraphicsView):
@@ -466,7 +493,6 @@ class ReSampleWindow(QDialog, Ui_ReSampleWin):
         TargetWidth = int(self.origin_width * self.WidthRatio)
         TargetHeight = int(self.origin_height * self.HeightRatio)
         self.resampleResult = np.zeros([TargetHeight, TargetWidth, self.bands])
-        cores_num = multiprocessing.cpu_count()
         if self.rBtn_NN.isChecked():  # 最近邻
             for row in range(TargetHeight):
                 srcRow = round(row / self.HeightRatio)

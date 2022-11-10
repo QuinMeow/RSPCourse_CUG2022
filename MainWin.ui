@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>645</width>
-    <height>421</height>
+    <width>724</width>
+    <height>447</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -75,22 +75,6 @@
          <widget class="QComboBox" name="ComBox_Stretch"/>
         </item>
        </layout>
-      </item>
-      <item>
-       <widget class="QGraphicsView" name="MainView">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="minimumSize">
-         <size>
-          <width>200</width>
-          <height>200</height>
-         </size>
-        </property>
-       </widget>
       </item>
      </layout>
     </item>
@@ -244,16 +228,16 @@
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QPushButton" name="pushButton_3">
+          <widget class="QPushButton" name="Btn_UnSupClassify">
            <property name="text">
-            <string>PushButton</string>
+            <string>非监督分类</string>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QPushButton" name="pushButton_4">
+          <widget class="QPushButton" name="Btn_SupClassify">
            <property name="text">
-            <string>PushButton</string>
+            <string>监督分类</string>
            </property>
           </widget>
          </item>
@@ -282,7 +266,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>645</width>
+     <width>724</width>
      <height>26</height>
     </rect>
    </property>
