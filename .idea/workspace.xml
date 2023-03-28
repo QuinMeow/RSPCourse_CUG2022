@@ -2,22 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="ecd30148-9300-45b1-8aca-e8f7b3f32d55" name="Changes" comment="Changes">
-      <change afterPath="$PROJECT_DIR$/ROI.dbf" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ROI.prj" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ROI.shp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ROI.shp.qtr" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ROI.shx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ROI.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SupCassifyWindow.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SupClassifyWin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/SupClassifyWin.ui" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/UnSupClassifyWin.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/UnSupClassifyWin.ui" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/UnSupClassifyWindow.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Main.py" beforeDir="false" afterPath="$PROJECT_DIR$/Main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/MainWin.py" beforeDir="false" afterPath="$PROJECT_DIR$/MainWin.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/MainWin.ui" beforeDir="false" afterPath="$PROJECT_DIR$/MainWin.ui" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/SupCassifyWindow.py" beforeDir="false" afterPath="$PROJECT_DIR$/SupCassifyWindow.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UnSupClassifyWindow.py" beforeDir="false" afterPath="$PROJECT_DIR$/UnSupClassifyWindow.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -33,6 +22,9 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/Main.py" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -52,7 +44,8 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
     &quot;last_opened_file_path&quot;: &quot;D:/GitHub/RSPCourse_CUG2022&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;http.proxy&quot;
   },
   &quot;keyToStringList&quot;: {
     &quot;com.intellij.ide.scratch.ScratchImplUtil$2/新建临时文件&quot;: [
@@ -119,6 +112,12 @@
       <workItem from="1668007970270" duration="1744000" />
       <workItem from="1668009827686" duration="169000" />
       <workItem from="1668041543220" duration="6091000" />
+      <workItem from="1668054760404" duration="375000" />
+      <workItem from="1668125559506" duration="7877000" />
+      <workItem from="1669430252193" duration="3797000" />
+      <workItem from="1669526954933" duration="21472000" />
+      <workItem from="1669610384694" duration="1465000" />
+      <workItem from="1669615126537" duration="10504000" />
     </task>
     <servers />
   </component>
@@ -152,7 +151,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/RSPCourse_CUG2022$UnSupClassifyWindow.coverage" NAME="UnSupClassifyWindow 覆盖结果" MODIFIED="1667986903374" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/RSPCourse_CUG2022$Main.coverage" NAME="Main 覆盖结果" MODIFIED="1668048864684" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/RSPCourse_CUG2022$Main.coverage" NAME="Main 覆盖结果" MODIFIED="1669627660106" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/RSPCourse_CUG2022$SupCassifyWindow.coverage" NAME="SupCassifyWindow 覆盖结果" MODIFIED="1668006585540" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

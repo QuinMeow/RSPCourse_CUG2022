@@ -10,7 +10,7 @@ import random
 
 # Class
 class Pixel:
-    """Pixel"""
+    """像素"""
 
     def __init__(self, initX: int, initY: int, initColor):
         self.x = initX
@@ -19,7 +19,7 @@ class Pixel:
 
 
 class Cluster:
-    """Cluster in Gray"""
+    """簇"""
 
     def __init__(self, initCenter):
         self.center = initCenter
@@ -27,7 +27,7 @@ class Cluster:
 
 
 class ClusterPair:
-    """Cluster Pair"""
+    """簇对"""
 
     def __init__(self, initClusterAIndex: int, initClusterBIndex: int, initDistance):
         self.clusterAIndex = initClusterAIndex
@@ -35,10 +35,13 @@ class ClusterPair:
         self.distance = initDistance
 
 
-# Functions
-
-# RGB
 def distanceBetween(colorA, colorB) -> float:
+    """
+    距离度量，优化欧氏距离
+    :param colorA:
+    :param colorB:
+    :return:
+    """
     aveR = float(int(colorA[0]) + int(colorB[0])) / 2
     dR = int(colorA[0]) - int(colorB[0])
     dG = int(colorA[1]) - int(colorB[1])
@@ -46,70 +49,64 @@ def distanceBetween(colorA, colorB) -> float:
     return math.sqrt((2 + aveR / 256) * (dR ** 2) + 4 * (dG ** 2) + (2 + (255 - aveR) / 256) * (dB ** 2))
 
 
-def doISODATARGB(image_data, K: int, TN: int, TS: float, TC: int, L: int, I: int):
-    imgArray = image_data
-    imgX, imgY, band = imgArray.shape
-    clusterList = []
-    # Generate K cluster centers randomly
+def doISODATA(image_data, K: int, TN: int, TS: float, TC: int, L: int, I: int):
+    img_array = image_data
+    imgX, imgY, band = img_array.shape
+    cluster_list = []
+    # 随机生成K个聚类中心
     for i in range(0, K):
         randomX = random.randint(0, imgX - 1)
         randomY = random.randint(0, imgY - 1)
         duplicated = False
-        for cluster in clusterList:
-            if (cluster.center[0] == imgArray[randomX, randomY, 0] and
-                    cluster.center[1] == imgArray[randomX, randomY, 1] and
-                    cluster.center[2] == imgArray[randomX, randomY, 2]):
+        for cluster in cluster_list:
+            if (cluster.center[0] == img_array[randomX, randomY, 0] and
+                    cluster.center[1] == img_array[randomX, randomY, 1] and
+                    cluster.center[2] == img_array[randomX, randomY, 2]):
                 duplicated = True
                 break
         if not duplicated:
-            clusterList.append(Cluster(numpy.array([imgArray[randomX, randomY, 0],
-                                                    imgArray[randomX, randomY, 1],
-                                                    imgArray[randomX, randomY, 2]],
+            cluster_list.append(Cluster(numpy.array([img_array[randomX, randomY, 0],
+                                                    img_array[randomX, randomY, 1],
+                                                    img_array[randomX, randomY, 2]],
                                                    dtype=numpy.uint8)))
 
-    # Iteration
-    iterationCount = 0
-    didAnythingInLastIteration = True
+    # 迭代
+    iteration_count = 0
+    did_anything_in_last_iteration = True
     while True:
-        iterationCount += 1
+        iteration_count += 1
 
-        # Clear the pixel lists of all clusters
-        for cluster in clusterList:
+        # 清除簇中的所有像素
+        for cluster in cluster_list:
             cluster.pixelList.clear()
-        print("------")
-        print("Iteration: {0}".format(iterationCount))
+        print("第{0}次迭代".format(iteration_count))
 
-        # Classify all pixels into clusters
-        print("Classifying...", end='', flush=True)
+        # 逐像元分类
         for row in range(0, imgX):
             for col in range(0, imgY):
-                targetClusterIndex = 0
-                targetClusterDistance = distanceBetween(imgArray[row, col], clusterList[0].center)
-                # Classify
-                for i in range(1, len(clusterList)):
-                    currentDistance = distanceBetween(imgArray[row, col], clusterList[i].center)
-                    if currentDistance < targetClusterDistance:
-                        targetClusterDistance = currentDistance
-                        targetClusterIndex = i
-                clusterList[targetClusterIndex].pixelList.append(Pixel(row, col, imgArray[row, col]))
-        print(" Finished.")
+                target_cluster_index = 0
+                target_cluster_distance = distanceBetween(img_array[row, col], cluster_list[0].center)
+                # 分类
+                for i in range(1, len(cluster_list)):
+                    currentDistance = distanceBetween(img_array[row, col], cluster_list[i].center)
+                    if currentDistance < target_cluster_distance:
+                        target_cluster_distance = currentDistance
+                        target_cluster_index = i
+                cluster_list[target_cluster_index].pixelList.append(Pixel(row, col, img_array[row, col]))
 
-        # Check TN
-        gotoNextIteration = False
-        for i in range(len(clusterList) - 1, -1, -1):
-            if len(clusterList[i].pixelList) < TN:
-                # Re-classify
-                clusterList.pop(i)
-                gotoNextIteration = True
+        # 检查是否满足样本最小数目
+        goto_next_iteration = False
+        for i in range(len(cluster_list) - 1, -1, -1):
+            if len(cluster_list[i].pixelList) < TN:
+                # 重新分类
+                cluster_list.pop(i)
+                goto_next_iteration = True
                 break
-        if gotoNextIteration:
-            print("TN checking not passed.")
+        if goto_next_iteration:
             continue
-        print("TN checking passed.")
 
-        # Recalculate the centers
-        print("Recalculating the centers...", end='', flush=True)
-        for cluster in clusterList:
+        # 重新计算聚类中心
+        for cluster in cluster_list:
             sumR = 0.0
             sumG = 0.0
             sumB = 0.0
@@ -123,134 +120,130 @@ def doISODATARGB(image_data, K: int, TN: int, TS: float, TC: int, L: int, I: int
             if (aveR != cluster.center[0] and
                     aveG != cluster.center[1] and
                     aveB != cluster.center[2]):
-                didAnythingInLastIteration = True
+                did_anything_in_last_iteration = True
             cluster.center = numpy.array([aveR, aveG, aveB], dtype=numpy.uint8)
-        print(" Finished.")
-        if iterationCount > I:
+        if iteration_count > I:
             break
-        if not didAnythingInLastIteration:
-            print("More iteration is not necessary.")
+        if not did_anything_in_last_iteration:  # 中心无变化
             break
 
-        # Calculate the average distance
-        print("Preparing for Merging and Spliting...", end='', flush=True)
-        aveDisctanceList = []
-        sumDistanceAll = 0.0
-        for cluster in clusterList:
+        # 计算平均距离
+        ave_disctance_list = []
+        sum_distance_all = 0.0
+        for cluster in cluster_list:
             currentSumDistance = 0.0
             for pixel in cluster.pixelList:
                 currentSumDistance += distanceBetween(pixel.color, cluster.center)
-            aveDisctanceList.append(float(currentSumDistance) / len(cluster.pixelList))
-            sumDistanceAll += currentSumDistance
-        aveDistanceAll = float(sumDistanceAll) / (imgX * imgY)
-        print(" Finished.")
+            ave_disctance_list.append(float(currentSumDistance) / len(cluster.pixelList))
+            sum_distance_all += currentSumDistance
+        ave_distance_all = float(sum_distance_all) / (imgX * imgY)
 
-        if (len(clusterList) <= K / 2) or not (iterationCount % 2 == 0 or len(clusterList) >= K * 2):
-            # Split
-            print("Split:", end='', flush=True)
-            beforeCount = len(clusterList)
-            for i in range(len(clusterList) - 1, -1, -1):
+        if (len(cluster_list) <= K / 2) or not (iteration_count % 2 == 0 or len(cluster_list) >= K * 2):
+            # 分裂
+            print("分裂类:", end='', flush=True)
+            for i in range(len(cluster_list) - 1, -1, -1):
                 currentSD = [0.0, 0.0, 0.0]
-                for pixel in clusterList[i].pixelList:
-                    currentSD[0] += (int(pixel.color[0]) - int(clusterList[i].center[0])) ** 2
-                    currentSD[1] += (int(pixel.color[1]) - int(clusterList[i].center[1])) ** 2
-                    currentSD[2] += (int(pixel.color[2]) - int(clusterList[i].center[2])) ** 2
-                currentSD[0] = math.sqrt(currentSD[0] / len(clusterList[i].pixelList))
-                currentSD[1] = math.sqrt(currentSD[1] / len(clusterList[i].pixelList))
-                currentSD[2] = math.sqrt(currentSD[2] / len(clusterList[i].pixelList))
-                # Find the max in SD of R, G and B
+                for pixel in cluster_list[i].pixelList:
+                    currentSD[0] += (int(pixel.color[0]) - int(cluster_list[i].center[0])) ** 2
+                    currentSD[1] += (int(pixel.color[1]) - int(cluster_list[i].center[1])) ** 2
+                    currentSD[2] += (int(pixel.color[2]) - int(cluster_list[i].center[2])) ** 2
+                currentSD[0] = math.sqrt(currentSD[0] / len(cluster_list[i].pixelList))
+                currentSD[1] = math.sqrt(currentSD[1] / len(cluster_list[i].pixelList))
+                currentSD[2] = math.sqrt(currentSD[2] / len(cluster_list[i].pixelList))
+                # 查找SD中RGB的最大值
                 maxSD = currentSD[0]
                 for j in (1, 2):
                     maxSD = currentSD[j] if currentSD[j] > maxSD else maxSD
                 if (maxSD > TS) and (
-                        (aveDisctanceList[i] > aveDistanceAll and len(clusterList[i].pixelList) > 2 * (TN + 1)) or (
-                        len(clusterList) < K / 2)):
+                        (ave_disctance_list[i] > ave_distance_all and len(cluster_list[i].pixelList) > 2 * (TN + 1)) or (
+                        len(cluster_list) < K / 2)):
                     gamma = 0.5 * maxSD
-                    clusterList[i].center[0] += gamma
-                    clusterList[i].center[1] += gamma
-                    clusterList[i].center[2] += gamma
-                    clusterList.append(Cluster(numpy.array([clusterList[i].center[0],
-                                                            clusterList[i].center[1],
-                                                            clusterList[i].center[2]],
+                    cluster_list[i].center[0] += gamma
+                    cluster_list[i].center[1] += gamma
+                    cluster_list[i].center[2] += gamma
+                    cluster_list.append(Cluster(numpy.array([cluster_list[i].center[0],
+                                                            cluster_list[i].center[1],
+                                                            cluster_list[i].center[2]],
                                                            dtype=numpy.uint8)))
-                    clusterList[i].center[0] -= gamma * 2
-                    clusterList[i].center[1] -= gamma * 2
-                    clusterList[i].center[2] -= gamma * 2
-                    clusterList.append(Cluster(numpy.array([clusterList[i].center[0],
-                                                            clusterList[i].center[1],
-                                                            clusterList[i].center[2]],
+                    cluster_list[i].center[0] -= gamma * 2
+                    cluster_list[i].center[1] -= gamma * 2
+                    cluster_list[i].center[2] -= gamma * 2
+                    cluster_list.append(Cluster(numpy.array([cluster_list[i].center[0],
+                                                            cluster_list[i].center[1],
+                                                            cluster_list[i].center[2]],
                                                            dtype=numpy.uint8)))
-                    clusterList.pop(i)
-            print(" {0} -> {1}".format(beforeCount, len(clusterList)))
-        elif (iterationCount % 2 == 0) or (len(clusterList) >= K * 2) or (iterationCount == I):
-            # Merge
-            print("Merge:", end='', flush=True)
-            beforeCount = len(clusterList)
-            didAnythingInLastIteration = False
-            clusterPairList = []
-            for i in range(0, len(clusterList)):
+                    cluster_list.pop(i)
+        elif (iteration_count % 2 == 0) or (len(cluster_list) >= K * 2) or (iteration_count == I):
+            # 合并
+            print("合并类:", end='', flush=True)
+            did_anything_in_last_iteration = False
+            cluster_pair_list = []
+            for i in range(0, len(cluster_list)):
                 for j in range(0, i):
-                    currentDistance = distanceBetween(clusterList[i].center, clusterList[j].center)
+                    currentDistance = distanceBetween(cluster_list[i].center, cluster_list[j].center)
                     if currentDistance < TC:
-                        clusterPairList.append(ClusterPair(i, j, currentDistance))
+                        cluster_pair_list.append(ClusterPair(i, j, currentDistance))
 
-            clusterPairListSorted = sorted(clusterPairList, key=lambda clusterPair: clusterPair.distance)
-            newClusterCenterList = []
-            mergedClusterIndexList = []
+            cluster_pair_list_sorted = sorted(cluster_pair_list, key=lambda clusterPair: clusterPair.distance)
+            new_cluster_center_list = []
+            merged_cluster_index_list = []
             mergedPairCount = 0
-            for clusterPair in clusterPairListSorted:
-                hasBeenMerged = False
-                for index in mergedClusterIndexList:
+            for clusterPair in cluster_pair_list_sorted:
+                has_been_merged = False
+                for index in merged_cluster_index_list:
                     if clusterPair.clusterAIndex == index or clusterPair.clusterBIndex == index:
-                        hasBeenMerged = True
+                        has_been_merged = True
                         break
-                if hasBeenMerged:
+                if has_been_merged:
                     continue
-                newCenterR = int((len(clusterList[clusterPair.clusterAIndex].pixelList) * float(
-                    clusterList[clusterPair.clusterAIndex].center[0]) + len(
-                    clusterList[clusterPair.clusterBIndex].pixelList) * float(
-                    clusterList[clusterPair.clusterBIndex].center[0])) / (
-                                         len(clusterList[clusterPair.clusterAIndex].pixelList) + len(
-                                     clusterList[clusterPair.clusterBIndex].pixelList)))
-                newCenterG = int((len(clusterList[clusterPair.clusterAIndex].pixelList) * float(
-                    clusterList[clusterPair.clusterAIndex].center[1]) + len(
-                    clusterList[clusterPair.clusterBIndex].pixelList) * float(
-                    clusterList[clusterPair.clusterBIndex].center[1])) / (
-                                         len(clusterList[clusterPair.clusterAIndex].pixelList) + len(
-                                     clusterList[clusterPair.clusterBIndex].pixelList)))
-                newCenterB = int((len(clusterList[clusterPair.clusterAIndex].pixelList) * float(
-                    clusterList[clusterPair.clusterAIndex].center[2]) + len(
-                    clusterList[clusterPair.clusterBIndex].pixelList) * float(
-                    clusterList[clusterPair.clusterBIndex].center[2])) / (
-                                         len(clusterList[clusterPair.clusterAIndex].pixelList) + len(
-                                     clusterList[clusterPair.clusterBIndex].pixelList)))
-                newClusterCenterList.append([newCenterR, newCenterG, newCenterB])
-                mergedClusterIndexList.append(clusterPair.clusterAIndex)
-                mergedClusterIndexList.append(clusterPair.clusterBIndex)
+                new_center_r = int((len(cluster_list[clusterPair.clusterAIndex].pixelList) * float(
+                    cluster_list[clusterPair.clusterAIndex].center[0]) + len(
+                    cluster_list[clusterPair.clusterBIndex].pixelList) * float(
+                    cluster_list[clusterPair.clusterBIndex].center[0])) / (
+                                         len(cluster_list[clusterPair.clusterAIndex].pixelList) + len(
+                                     cluster_list[clusterPair.clusterBIndex].pixelList)))
+                new_center_g = int((len(cluster_list[clusterPair.clusterAIndex].pixelList) * float(
+                    cluster_list[clusterPair.clusterAIndex].center[1]) + len(
+                    cluster_list[clusterPair.clusterBIndex].pixelList) * float(
+                    cluster_list[clusterPair.clusterBIndex].center[1])) / (
+                                         len(cluster_list[clusterPair.clusterAIndex].pixelList) + len(
+                                     cluster_list[clusterPair.clusterBIndex].pixelList)))
+                new_center_b = int((len(cluster_list[clusterPair.clusterAIndex].pixelList) * float(
+                    cluster_list[clusterPair.clusterAIndex].center[2]) + len(
+                    cluster_list[clusterPair.clusterBIndex].pixelList) * float(
+                    cluster_list[clusterPair.clusterBIndex].center[2])) / (
+                                         len(cluster_list[clusterPair.clusterAIndex].pixelList) + len(
+                                     cluster_list[clusterPair.clusterBIndex].pixelList)))
+                new_cluster_center_list.append([new_center_r, new_center_g, new_center_b])
+                merged_cluster_index_list.append(clusterPair.clusterAIndex)
+                merged_cluster_index_list.append(clusterPair.clusterBIndex)
                 mergedPairCount += 1
                 if mergedPairCount > L:
                     break
-            if len(mergedClusterIndexList) > 0:
-                didAnythingInLastIteration = True
-            mergedClusterIndexListSorted = sorted(mergedClusterIndexList, key=lambda clusterIndex: clusterIndex,
+            if len(merged_cluster_index_list) > 0:
+                did_anything_in_last_iteration = True
+            merged_cluster_index_list_sorted = sorted(merged_cluster_index_list, key=lambda clusterIndex: clusterIndex,
                                                   reverse=True)
-            for index in mergedClusterIndexListSorted:
-                clusterList.pop(index)
-            for center in newClusterCenterList:
-                clusterList.append(Cluster(numpy.array([center[0], center[1], center[2]], dtype=numpy.uint8)))
-            print(" {0} -> {1}".format(beforeCount, len(clusterList)))
+            for index in merged_cluster_index_list_sorted:
+                cluster_list.pop(index)
+            for center in new_cluster_center_list:
+                cluster_list.append(Cluster(numpy.array([center[0], center[1], center[2]], dtype=numpy.uint8)))
 
-    # Generate the new image martrix
-    print("Over")
-    print("Classified to {0} kinds.".format(len(clusterList)))
-    newImgArray = numpy.zeros((imgX, imgY, 3), dtype=numpy.uint8)
-    for cluster in clusterList:
+    # 生成新影像
+    print("聚类完成")
+    print("聚类结果为{0}类".format(len(cluster_list)))
+    new_img_array = numpy.zeros((imgX, imgY, 3), dtype=numpy.uint8)
+    color_table = np.array(
+        [[255, 0, 0], [0, 255, 0], [0, 0, 255], [0, 255, 255], [255, 0, 255], [255, 255, 0], [47, 79, 79],
+         [255, 215, 0], [255, 99, 71]],
+        dtype=int)
+    kind = -1
+    for cluster in cluster_list:
+        kind += 1
         for pixel in cluster.pixelList:
-            newImgArray[pixel.x, pixel.y, 0] = int(cluster.center[0])
-            newImgArray[pixel.x, pixel.y, 1] = int(cluster.center[1])
-            newImgArray[pixel.x, pixel.y, 2] = int(cluster.center[2])
+            new_img_array[pixel.x, pixel.y, :] = color_table[kind, :]  # 根据颜色查找表赋予颜色
 
-    return newImgArray
+    return new_img_array
 
 
 class UnSupClassifyWindow(QDialog, Ui_UnSupClassifyWin):
@@ -296,5 +289,5 @@ class UnSupClassifyWindow(QDialog, Ui_UnSupClassifyWin):
         self.argvL = self.SpBox_L.value()
         self.argvI = self.SpBox_I.value()
 
-        self.Classified_data = doISODATARGB(self.origin_data, self.argvK, self.argvTN, self.argvTS, self.argvTC,
-                                            self.argvL, self.argvI)
+        self.Classified_data = doISODATA(self.origin_data, self.argvK, self.argvTN, self.argvTS, self.argvTC,
+                                         self.argvL, self.argvI)

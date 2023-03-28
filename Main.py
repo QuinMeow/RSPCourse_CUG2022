@@ -123,10 +123,13 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         """
         # Band = np.array((int(self.SpBox_Red.value()) - 1, int(self.SpBox_Green.value()) - 1,
         #                  int(self.SpBox_Blue.value()) - 1))
-        SC = SupClassifyWindow(self.filename,self.qim_data)
+        SC = SupClassifyWindow(self.filename, self.qim_data)
         SC.show()
         if SC.exec_() == QDialog.Accepted:
             self.MainView.showInput(SC.Classified_data)
+            form = ConfMatForm(SC.label_dict, SC.Conf_mat)
+            form.exec()
+            # form.updateUi(SC.label_dict, SC.Conf_mat)
 
 
 class MyMainView(QGraphicsView):
@@ -335,7 +338,7 @@ class BandMathWindow(QDialog, Ui_BandMathWin):
 
     # 中缀转后缀
     def middle2behind(self):
-        formula = self.LinEdit_Formula.text()
+        formula = self.LinEdit_Formula.text()  # 从UI界面读取
         # 合并非符号
         formula = re.split(r'([\+\-\*\/\(\)])', formula)
         formula = list(filter(None, formula))
@@ -343,25 +346,23 @@ class BandMathWindow(QDialog, Ui_BandMathWin):
         s = Stack(stack=[], top=-1)
         # 遍历表达式
         for i in formula:
-            # 如果表达式元素为+或-，由于+或-的运算优先级最低，所以如果栈为非空，则从栈顶开始遍历栈符号，依次出栈，直到栈为空或者是遇到(
-            if i == '+' or i == '-':
-                if s.top > -1:
+            if i == '+' or i == '-':  # 如果表达式元素为+或-
+                if s.top > -1:  # 由于+或-的运算优先级最低，所以如果栈为非空，则从栈顶开始遍历栈符号，依次出栈，直到栈为空或者是遇到(
                     while s.top > -1 and s.stack[s.top] != '(':
                         behind.append(s.stack[s.top])
                         s.stack.pop()
                         s.top -= 1
-                    # 将此时在表达式中遍历的这个符号入栈，也就是i
+                    # 将i入站
                     s.stack.append(i)
                     s.top += 1
                 # 如果栈为空，直接入栈
                 else:
                     s.stack.append(i)
                     s.top += 1
-            # 如果表达式元素为*或/，由于*或/的运算优先级较高，所以如果栈为非空，则从栈顶开始遍历栈内符号，如果
-            # 遇到*或者/，则依次出栈，直到栈为空或者是遇到(和+和-
+            # 如果表达式元素为*或/
             elif i == '*' or i == '/':
-                if s.top > -1 and s.stack[s.top] != '(':
-                    while s.stack[s.top] == '*' and s.stack[s.top] == '/':
+                if s.top > -1 and s.stack[s.top] != '(':  # 由于*或/的运算优先级较高，所以如果栈为非空，则从栈顶开始遍历栈内符号
+                    while s.stack[s.top] == '*' and s.stack[s.top] == '/':  # 如果遇到*或者/，则依次出栈，直到栈为空或者是遇到(和+和-
                         behind.append(s.stack[s.top])
                         s.stack.pop()
                         s.top -= 1
@@ -391,8 +392,7 @@ class BandMathWindow(QDialog, Ui_BandMathWin):
             s.top -= 1
         return behind
 
-    # 遍历后缀表达式，如果遇到数字，将其放入栈中，如果遇到符号，则取出栈中最顶上的两个数字进行
-    # 计算，最顶上的那个数字是右项。运算完成之后将结果再存回栈中
+    # 遍历后缀表达式，如果遇到数字，将其放入栈中，如果遇到符号，则取出栈中最顶上的两个数字进行计算，最顶上的那个数字是右项。运算完成之后将结果再存回栈中
     def behindCalculation(self):
         behind = self.middle2behind()
         result = Stack(stack=[], top=-1)
@@ -498,8 +498,9 @@ class ReSampleWindow(QDialog, Ui_ReSampleWin):
                 srcRow = round(row / self.HeightRatio)
                 for col in range(TargetWidth):
                     srcCol = round(col / self.WidthRatio)
-                    for band in range(self.bands):
-                        self.resampleResult[row, col, band] = self.origin_data[srcRow, srcCol, band]
+                    # for band in range(self.bands):
+                    #     self.resampleResult[row, col, band] = self.origin_data[srcRow, srcCol, band]
+                    self.resampleResult[row, col, :] = self.origin_data[srcRow, srcCol, :]
         elif self.rBtn_Liner.isChecked():  # 双线性
             for row in range(TargetHeight):
                 srcRow = row / self.HeightRatio
@@ -509,10 +510,14 @@ class ReSampleWindow(QDialog, Ui_ReSampleWin):
                     srcCol = col / self.WidthRatio
                     m, j = np.modf(srcCol)  # 整数部分j，小数部分m
                     j = int(j)
-                    for band in range(self.bands):
-                        self.resampleResult[row, col, band] = \
-                            self.origin_data[i, j, band] + self.origin_data[i + 1, j, band] * n + self.origin_data[
-                                i, j + 1, band] * m + self.origin_data[i + 1, j + 1, band] * n * m
+                    # for band in range(self.bands):
+                    #     self.resampleResult[row, col, band] = \
+                    #         self.origin_data[i, j, band] + self.origin_data[i + 1, j, band] * n + self.origin_data[
+                    #             i, j + 1, band] * m + self.origin_data[i + 1, j + 1, band] * n * m
+                    self.resampleResult[row, col, :] = self.origin_data[i, j, :] * (1 - n) * (1 - m) + \
+                                                       self.origin_data[i + 1, j,:] * n * (1 - m) + \
+                                                       self.origin_data[i, j + 1,:] * (1 - n) * m + \
+                                                       self.origin_data[i + 1, j + 1,:] * n * m
         elif self.rBtn_Cube.isChecked():  # 双立方
             for row in range(TargetHeight):
                 srcRow = row / self.HeightRatio
